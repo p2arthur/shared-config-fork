@@ -44,12 +44,7 @@ runs:
       working-directory: ${{ github.action_path }}
       run: npm ci
 
-    - name: Generate Documentation
-      shell: bash
-      working-directory: ${{ inputs.working-directory }}
-      run: |
-        if [ -f "${{ inputs.config-path }}" ]; then
-          npx --prefix "${{ github.action_path }}" typedoc --options "${{ inputs.config-path }}"
+    - name: Ge--prefix "${{ github.action_path }}" typedoc --options "${{ inputs.config-path }}"
         else
           npx --prefix "${{ github.action_path }}" typedoc \
             --options "${{ github.action_path }}/typedoc.json" \
@@ -64,7 +59,12 @@ runs:
         EXAMPLES_CONFIG="typedoc.examples.json"
         if [ -f "$EXAMPLES_CONFIG" ]; then
           echo "Found $EXAMPLES_CONFIG, generating examples documentation..."
-          npx --prefix "${{ github.action_path }}" typedoc --options "$EXAMPLES_CONFIG"
+          npx --prefix "${{ github.action_path }}"-directory: ${{ inputs.working-directory }}
+      run: |
+        EXAMPLES_CONFIG="typedoc.examples.json"
+        if [ -f "$EXAMPLES_CONFIG" ]; then
+          echo "Found $EXAMPLES_CONFIG, generating examples documentation..."
+          npx typedoc --options "$EXAMPLES_CONFIG"
         else
           echo "No $EXAMPLES_CONFIG found, skipping examples documentation"
         fi
