@@ -12,9 +12,13 @@ inputs:
     required: false
     default: "."
   docs-path:
-    description: Output path for generated docs
+    description: Output path for generated docs (used when no config file exists)
     required: false
     default: "docs"
+  html-docs-path:
+    description: Path to HTML docs for GitHub Pages publishing (use when typedoc.json has multi-output)
+    required: false
+    default: ""
   config-path:
     description: Path to typedoc config file
     required: false
@@ -23,6 +27,15 @@ inputs:
     description: Entry points (space-separated)
     required: false
     default: "src/index.ts"
+  output-format:
+    description: "Output format: 'html' for GitHub Pages, 'markdown' for doc site integration"
+    required: false
+    default: "html"
+
+outputs:
+  html-docs-path:
+    description: Path to the generated HTML documentation (for publishing)
+    value: ${{ steps.set-output-path.outputs.html-docs-path }}
 
 runs:
   using: composite
@@ -43,13 +56,26 @@ runs:
       shell: bash
       working-directory: ${{ inputs.working-directory }}
       run: |
-        if [ -f "${{ inputs.config-path }}" ]; then
-          npx typedoc --options "${{ inputs.config-path }}"
+        CONFIG_FILE="${{ inputs.config-path }}"
+        OUTPUT_FORMAT="${{ inputs.output-format }}"
+
+        if [ -f "$CONFIG_FILE" ]; then
+          # Check if the config uses markdown plugin but user wants HTML
+          if [ "$OUTPUT_FORMAT" = "html" ] && grep -q "typedoc-plugin-markdown" "$CONFIG_FILE" 2>/dev/null; then
+            echo "::warning::Your typedoc.json uses typedoc-plugin-markdown but output-format is 'html'. The markdown plugin will generate .md files instead of .html files. For GitHub Pages, either remove the plugin from your config or use a static site generator to convert the markdown."
+          fi
+          npx typedoc --options "$CONFIG_FILE"
         else
+          # Use action's default config
+          PLUGIN_ARGS=""
+          if [ "$OUTPUT_FORMAT" = "markdown" ]; then
+            PLUGIN_ARGS="--plugin typedoc-plugin-markdown"
+          fi
           npx typedoc \
             --options "${{ github.action_path }}/typedoc.json" \
             --entryPoints "${{ inputs.entry-points }}" \
-            --out "${{ inputs.docs-path }}"
+            --out "${{ inputs.docs-path }}" \
+            $PLUGIN_ARGS
         fi
 
     - name: Generate Examples Documentation
@@ -81,3 +107,37 @@ runs:
         else
           echo "No $EXAMPLES_CONFIG found, skipping examples documentation"
         fi
+
+    - name: Determine HTML Docs Path
+      id: set-output-path
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: |
+        # Priority: explicit input > detect from config > default
+        if [ -n "${{ inputs.html-docs-path }}" ]; then
+          HTML_PATH="${{ inputs.html-docs-path }}"
+        elif [ -f "${{ inputs.config-path }}" ]; then
+          # Try to extract HTML output path from typedoc.json outputs array
+          HTML_PATH=$(node -e "
+            const fs = require('fs');
+            try {
+              const config = JSON.parse(fs.readFileSync('${{ inputs.config-path }}', 'utf8'));
+              if (config.outputs && Array.isArray(config.outputs)) {
+                const htmlOutput = config.outputs.find(o => o.name === 'html');
+                if (htmlOutput) {
+                  console.log(htmlOutput.path);
+                  process.exit(0);
+                }
+              }
+              // Fallback to 'out' property or default
+              console.log(config.out || '${{ inputs.docs-path }}');
+            } catch (e) {
+              console.log('${{ inputs.docs-path }}');
+            }
+          " 2>/dev/null || echo "${{ inputs.docs-path }}")
+        else
+          HTML_PATH="${{ inputs.docs-path }}"
+        fi
+
+        echo "html-docs-path=$HTML_PATH" >> $GITHUB_OUTPUT
+        echo "HTML documentation path: $HTML_PATH"
