@@ -19,9 +19,13 @@ inputs:
     required: false
     default: "false"
   audit-level:
-    description: "Minimum vulnerability severity to fail: low, moderate, high, critical"
+    description: "Minimum vulnerability severity to report: low, moderate, high, critical"
     required: false
     default: "moderate"
+  audit-fail-on-vulnerability:
+    description: Fail the CI if vulnerabilities are found at or above audit-level
+    required: false
+    default: "false"
   skip-lint:
     description: Skip linting step
     required: false
@@ -92,6 +96,7 @@ runs:
       if: inputs.skip-audit != 'true'
       shell: bash
       working-directory: ${{ inputs.working-directory }}
+      continue-on-error: ${{ inputs.audit-fail-on-vulnerability != 'true' }}
       run: npm audit --audit-level=${{ inputs.audit-level }}
 
     - name: Lint
