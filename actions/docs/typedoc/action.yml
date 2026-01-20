@@ -56,3 +56,15 @@ runs:
             --entryPoints "${{ inputs.entry-points }}" \
             --out "${{ inputs.docs-path }}"
         fi
+
+    - name: Generate Examples Documentation
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: |
+        EXAMPLES_CONFIG="typedoc.examples.json"
+        if [ -f "$EXAMPLES_CONFIG" ]; then
+          echo "Found $EXAMPLES_CONFIG, generating examples documentation..."
+          npx --prefix "${{ github.action_path }}" typedoc --options "$EXAMPLES_CONFIG"
+        else
+          echo "No $EXAMPLES_CONFIG found, skipping examples documentation"
+        fi
