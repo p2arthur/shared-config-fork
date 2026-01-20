@@ -47,7 +47,7 @@ permissions:
 jobs:
   ci:
     name: CI
-    uses: mrcointreau/shared-config/.github/workflows/ci.yml@main
+    uses: p2arthur/shared-config-fork/.github/workflows/ci.yml@main
     with:
       project-type: ${{ inputs.project-type }}
       working-directory: ${{ inputs.working-directory }}
@@ -60,7 +60,7 @@ jobs:
     name: Docs
     needs: ci
     if: ${{ !inputs.skip-docs && needs.ci.result == 'success' }}
-    uses: mrcointreau/shared-config/.github/workflows/docs.yml@main
+    uses: p2arthur/shared-config-fork/.github/workflows/docs.yml@main
     with:
       project-type: ${{ inputs.project-type }}
       working-directory: ${{ inputs.working-directory }}
@@ -76,7 +76,7 @@ jobs:
     if: |
       needs.ci.result == 'success' &&
       (needs.docs.result == 'success' || needs.docs.result == 'skipped')
-    uses: mrcointreau/shared-config/.github/workflows/release.yml@main
+    uses: p2arthur/shared-config-fork/.github/workflows/release.yml@main
     with:
       project-type: ${{ inputs.project-type }}
       working-directory: ${{ inputs.working-directory }}

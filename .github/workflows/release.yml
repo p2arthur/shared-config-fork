@@ -157,7 +157,7 @@ jobs:
 
       - name: Generate Bot Token
         id: bot-token
-        uses: mrcointreau/shared-config/actions/utils/bot-token@main
+        uses: p2arthur/shared-config-fork/actions/utils/bot-token@main
         with:
           app-id: ${{ secrets.BOT_ID }}
           private-key: ${{ secrets.BOT_SK }}
@@ -165,7 +165,7 @@ jobs:
       - name: Release Node Package
         id: release-node
         if: inputs.project-type == 'node'
-        uses: mrcointreau/shared-config/actions/release/node@main
+        uses: p2arthur/shared-config-fork/actions/release/node@main
         with:
           bot-token: ${{ steps.bot-token.outputs.token }}
           build-command: ${{ inputs.build-command }}
@@ -181,7 +181,7 @@ jobs:
       - name: Release Python Package
         id: release-python
         if: inputs.project-type == 'python'
-        uses: mrcointreau/shared-config/actions/release/python@main
+        uses: p2arthur/shared-config-fork/actions/release/python@main
         with:
           bot-token: ${{ steps.bot-token.outputs.token }}
           build-command: ${{ inputs.build-command }}
@@ -215,7 +215,7 @@ jobs:
     steps:
       - name: Generate Bot Token
         id: bot-token
-        uses: mrcointreau/shared-config/actions/utils/bot-token@main
+        uses: p2arthur/shared-config-fork/actions/utils/bot-token@main
         with:
           app-id: ${{ secrets.BOT_ID }}
           private-key: ${{ secrets.BOT_SK }}

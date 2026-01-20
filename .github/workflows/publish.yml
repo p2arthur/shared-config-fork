@@ -102,7 +102,7 @@ jobs:
 
       - name: Publish Node Package
         if: inputs.project-type == 'node'
-        uses: mrcointreau/shared-config/actions/publish/node@main
+        uses: p2arthur/shared-config-fork/actions/publish/node@main
         with:
           node-version: ${{ inputs.node-version }}
           npm-token: ${{ secrets.NPM_TOKEN }}
@@ -112,7 +112,7 @@ jobs:
 
       - name: Publish Python Package
         if: inputs.project-type == 'python'
-        uses: mrcointreau/shared-config/actions/publish/python@main
+        uses: p2arthur/shared-config-fork/actions/publish/python@main
         with:
           pypi-token: ${{ secrets.PYPI_TOKEN }}
           python-version: ${{ inputs.python-version }}

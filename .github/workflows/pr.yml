@@ -100,7 +100,7 @@ jobs:
   ci:
     name: CI
     needs: validate
-    uses: mrcointreau/shared-config/.github/workflows/ci.yml@main
+    uses: p2arthur/shared-config-fork/.github/workflows/ci.yml@main
     with:
       audit-level: ${{ inputs.audit-level }}
       build-command: ${{ inputs.build-command }}
@@ -132,7 +132,7 @@ jobs:
       - name: Checkout shared-config
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
-          repository: mrcointreau/shared-config
+          repository: p2arthur/shared-config-fork
           path: .shared-config
 
       - name: Setup Node.js

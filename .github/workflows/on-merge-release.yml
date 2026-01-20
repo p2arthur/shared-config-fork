@@ -66,7 +66,7 @@ permissions:
 jobs:
   release:
     name: Release (Stable)
-    uses: mrcointreau/shared-config/.github/workflows/release.yml@main
+    uses: p2arthur/shared-config-fork/.github/workflows/release.yml@main
     with:
       project-type: ${{ inputs.project-type }}
       working-directory: ${{ inputs.working-directory }}

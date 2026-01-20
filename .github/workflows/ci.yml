@@ -103,7 +103,7 @@ jobs:
 
       - name: Run Node CI
         if: inputs.project-type == 'node'
-        uses: mrcointreau/shared-config/actions/ci/node@main
+        uses: p2arthur/shared-config-fork/actions/ci/node@main
         with:
           audit-level: ${{ inputs.audit-level }}
           build-command: ${{ inputs.build-command }}
@@ -120,7 +120,7 @@ jobs:
 
       - name: Run Python CI
         if: inputs.project-type == 'python'
-        uses: mrcointreau/shared-config/actions/ci/python@main
+        uses: p2arthur/shared-config-fork/actions/ci/python@main
         with:
           build-command: ${{ inputs.build-command }}
           lint-command: ${{ inputs.lint-command }}

@@ -69,7 +69,7 @@ jobs:
 
       - name: Generate TypeDoc
         if: inputs.project-type == 'node'
-        uses: mrcointreau/shared-config/actions/docs/typedoc@main
+        uses: p2arthur/shared-config-fork/actions/docs/typedoc@main
         with:
           docs-path: ${{ inputs.docs-path }}
           node-version: ${{ inputs.node-version }}
@@ -77,7 +77,7 @@ jobs:
 
       - name: Generate Sphinx Docs
         if: inputs.project-type == 'python'
-        uses: mrcointreau/shared-config/actions/docs/sphinx@main
+        uses: p2arthur/shared-config-fork/actions/docs/sphinx@main
         with:
           docs-path: ${{ inputs.docs-path }}
           python-version: ${{ inputs.python-version }}
@@ -109,7 +109,7 @@ jobs:
           path: docs
 
       - name: Publish to GitHub Pages
-        uses: mrcointreau/shared-config/actions/docs/publish@main
+        uses: p2arthur/shared-config-fork/actions/docs/publish@main
         with:
           docs-path: docs
           github-token: ${{ github.token }}
@@ -130,7 +130,7 @@ jobs:
           path: docs
 
       - name: Publish to DevPortal Branch
-        uses: mrcointreau/shared-config/actions/docs/devportal-publish@main
+        uses: p2arthur/shared-config-fork/actions/docs/devportal-publish@main
         with:
           docs-path: docs
           docs-branch: ${{ inputs.devportal-docs-branch }}
