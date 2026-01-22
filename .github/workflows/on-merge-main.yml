@@ -1,5 +1,5 @@
 name: On Merge to Main
-author: p2arthur
+
 description: CI, Docs, and Release workflow triggered on merges to main branch
 on:
   workflow_call:
