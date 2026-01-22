@@ -7,7 +7,7 @@ inputs:
     description: GitHub token for publishing
     required: true
   docs-path:
-    description: Path to the documentation to publish
+    description: Path to generated docs
     required: true
 
 runs:

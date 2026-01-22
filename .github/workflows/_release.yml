@@ -1,6 +1,6 @@
 # ⚠️ INTERNAL: This workflow is NOT reusable
 # It's specific to this repository for publishing the npm package
-# For reusable workflows, see: ci.yml, pr.yml, release.yml, docs.yml, publish.yml
+# For reusable workflows, see: ci.yml, pr.yml, release.yml, docs.yml
 
 name: Internal Release
 
@@ -8,6 +8,11 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      dry-run:
+        description: Run in dry-run mode
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -41,6 +46,7 @@ jobs:
     with:
       back-merge: ${{ github.ref_name == 'release' }}
       config-path: .releaserc.json
+      dry-run: ${{ inputs.dry-run || false }}
       publish: ${{ needs.check-paths.outputs.configs-changed == 'true' }}
       project-type: node
       use-oidc: true

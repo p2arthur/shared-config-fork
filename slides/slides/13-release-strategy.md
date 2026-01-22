@@ -15,16 +15,16 @@ layout: code-full
 
 - All PRs merge to `main` → triggers beta release automatically
 - Merge `main` → `release` for stable release
-- Or **manually dispatch** stable release from GitHub UI
+- Run release workflow manually on `release` branch
 
 <div>
 
-### Back-merge (automatic)
+### Back-merge (optional)
 
-After stable release, `release` → `main` back-merge happens automatically to sync version history.
+Merging `release` → `main` after stable release is **optional**. If disabled, `main` stays pure beta (no stable versions in history). Enable only if you want `main` to track stable releases too.
 
 </div>
 
 <!--
-We use trunk-based development where main produces beta releases and the release branch produces stable versions. The orchestration layer handles back-merge automatically—no configuration needed. Stable releases can be triggered by merging to release or manually via workflow dispatch for recovery scenarios.
+We use trunk-based development where main produces beta releases and the release branch produces stable versions. Back-merge is optional. If disabled, main stays pure beta with no stable version numbers in its history. Let's see how the release workflow implements this branching strategy.
 -->

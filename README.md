@@ -23,7 +23,6 @@ Designed to standardize CI/CD pipelines across multiple repositories while keepi
 | `pr.yml` | CI + conventional commit linting for pull requests |
 | `release.yml` | Semantic release with optional npm/PyPI publishing |
 | `docs.yml` | Generate and publish documentation (TypeDoc/Sphinx) |
-| `publish.yml` | Standalone package publishing to npm/PyPI |
 
 ### CI Workflow
 
@@ -57,7 +56,6 @@ jobs:
     uses: mrcointreau/shared-config/.github/workflows/pr.yml@main
     with:
       project-type: node
-      run-commit-lint: true
 ```
 
 ### Release Workflow
@@ -177,8 +175,6 @@ Lower-level actions used by the workflows:
 | `actions/ci/python` | Python CI (lint, test, build, audit) |
 | `actions/release/node` | Node.js semantic release |
 | `actions/release/python` | Python semantic release |
-| `actions/publish/node` | Publish to npm |
-| `actions/publish/python` | Publish to PyPI |
 | `actions/docs/typedoc` | Generate TypeDoc documentation |
 | `actions/docs/sphinx` | Generate Sphinx documentation |
 | `actions/docs/publish` | Publish to GitHub Pages |

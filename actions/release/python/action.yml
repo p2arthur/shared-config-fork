@@ -22,7 +22,7 @@ inputs:
     required: false
     default: "false"
   use-oidc:
-    description: Use OIDC trusted publishing (recommended), set to 'false' to use pypi-token instead
+    description: Use OIDC trusted publishing (recommended), set to 'false' to use tokens
     required: false
     default: "true"
   config-path:
@@ -92,24 +92,33 @@ runs:
         DRY_RUN: ${{ inputs.dry-run }}
         NODE_PATH: ${{ github.action_path }}/node_modules
       run: |
-        # pypi-token is optional: if provided, uses token auth; otherwise uses OIDC trusted publishing
+        # =============================================================================
+        # STEP 1: Validate authentication
+        # OIDC is preferred (no token needed), but if disabled, pypi-token is required
+        # =============================================================================
         if [ "${{ inputs.dry-run }}" != "true" ] && [ "${{ inputs.use-oidc }}" != "true" ] && [ -z "${{ inputs.pypi-token }}" ]; then
           echo "::error::pypi-token is required when use-oidc is false (set PYPI_TOKEN or run with dry-run)."
           exit 1
         fi
 
+        # =============================================================================
+        # STEP 2: Prepare semantic-release arguments
+        # =============================================================================
         ARGS=""
         if [ "${{ inputs.dry-run }}" = "true" ]; then
           ARGS="--dry-run"
         fi
 
-        CONFIG_SRC=""
-        CLEANUP_CONFIG=false
+        # =============================================================================
+        # STEP 3: Prepare config file
+        # We copy config to a temp file because:
+        # - We may need to inject PyPI publish commands
+        # - We don't want to modify user's config file
+        # =============================================================================
+        TEMP_CONFIG=".releaserc.semantic-release.json"
 
-        # Determine config source: use explicit config-path or default to action config
         if [ -n "${{ inputs.config-path }}" ]; then
           CONFIG_PATH="${{ inputs.config-path }}"
-          # Convert relative path to absolute
           if [[ "$CONFIG_PATH" != /* ]]; then
             CONFIG_SRC="$(pwd)/$CONFIG_PATH"
           else
@@ -119,51 +128,65 @@ runs:
           CONFIG_SRC="${{ github.action_path }}/.releaserc.json"
         fi
 
-        # Copy config to working directory for semantic-release to auto-detect
-        # Always copy so we don't pick up a repo root config implicitly.
-        if [ "$(realpath "$CONFIG_SRC")" != "$(realpath .releaserc.json 2>/dev/null)" ]; then
-          cp "$CONFIG_SRC" .releaserc.json
-          CLEANUP_CONFIG=true
-        fi
+        cp "$CONFIG_SRC" "$TEMP_CONFIG"
 
-        # Enable PyPI publishing if requested (atomic release+publish)
+        # =============================================================================
+        # STEP 4: Enable PyPI publishing if requested (atomic release+publish)
+        # =============================================================================
         if [ "${{ inputs.pypi-publish }}" = "true" ]; then
-          # Determine publish command based on auth method
+          if [ ! -d "${{ inputs.dist-directory }}" ]; then
+            echo "::error::dist-directory '${{ inputs.dist-directory }}' does not exist. Ensure build-command creates this directory."
+            exit 1
+          fi
+
           if [ "${{ inputs.use-oidc }}" = "true" ]; then
             PUBLISH_CMD="uv publish --trusted-publishing always ${{ inputs.dist-directory }}/*"
           else
             PUBLISH_CMD="uv publish --token \$PYPI_TOKEN ${{ inputs.dist-directory }}/*"
           fi
 
-          # Use jq to update the exec plugin:
-          # 1. Append build command to prepareCmd (runs after version bump)
-          # 2. Add publishCmd to publish to PyPI
+          # Ensure @semantic-release/exec exists; append if missing, otherwise merge commands.
           jq --arg build "${{ inputs.build-command }}" --arg publish "$PUBLISH_CMD" '
-            .plugins |= map(
-              if type == "array" and .[0] == "@semantic-release/exec" then
-                [.[0], (.[1] + {prepareCmd: (.[1].prepareCmd + " && " + $build), publishCmd: $publish})]
+            def add_exec:
+              .plugins += [["@semantic-release/exec", {prepareCmd: $build, publishCmd: $publish}]];
+            .plugins |= (
+              if any(.[]; (type=="array" and .[0]=="@semantic-release/exec")) then
+                map(
+                  if type == "array" and .[0] == "@semantic-release/exec" then
+                    [.[0], (.[1] // {}) + {
+                      prepareCmd: ((.[1].prepareCmd // "") | if length > 0 then . + " && " + $build else $build end),
+                      publishCmd: $publish
+                    }]
+                  else
+                    .
+                  end
+                )
               else
-                .
+                add_exec
               end
             )
-          ' .releaserc.json > .releaserc.json.tmp && mv .releaserc.json.tmp .releaserc.json
+          ' "$TEMP_CONFIG" > "$TEMP_CONFIG.tmp" && mv "$TEMP_CONFIG.tmp" "$TEMP_CONFIG"
         fi
 
+        # =============================================================================
+        # STEP 5: Run semantic-release
+        # =============================================================================
         PREV_TAG=$(git describe --tags --abbrev=0 2>/dev/null || true)
 
-        # Run semantic-release and capture output
+        # Capture output and exit code (set +e prevents script from exiting on failure)
         set +e
-        OUTPUT=$(npx --prefix "${{ github.action_path }}" semantic-release $ARGS 2>&1)
+        OUTPUT=$(npx --prefix "${{ github.action_path }}" semantic-release --extends "./$TEMP_CONFIG" $ARGS 2>&1)
         EXIT_CODE=$?
         set -e
         echo "$OUTPUT"
 
-        # Cleanup config (only if we copied it)
-        if [ "$CLEANUP_CONFIG" = "true" ]; then
-          rm -f .releaserc.json
-        fi
+        rm -f "$TEMP_CONFIG"
 
-        # Detect new release by checking if the latest tag advanced
+        # =============================================================================
+        # STEP 6: Set outputs
+        # We detect new releases by comparing git tags before/after semantic-release
+        # (more reliable than parsing semantic-release output)
+        # =============================================================================
         NEW_TAG=$(git describe --tags --abbrev=0 2>/dev/null || true)
         if [ "$EXIT_CODE" -eq 0 ] && [ -n "$NEW_TAG" ] && [ "$NEW_TAG" != "$PREV_TAG" ]; then
           echo "new-release-published=true" >> $GITHUB_OUTPUT

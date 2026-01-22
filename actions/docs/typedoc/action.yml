@@ -12,7 +12,7 @@ inputs:
     required: false
     default: "."
   docs-path:
-    description: Output path for generated docs (used when no config file exists)
+    description: Path to generated docs
     required: false
     default: "docs"
   html-docs-path:

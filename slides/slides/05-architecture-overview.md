@@ -6,7 +6,7 @@ layout: diagram-tight
 
 <div>
 
-```mermaid {scale: 0.39}
+```mermaid {scale: 0.49}
 flowchart TB
     subgraph shared-config["shared-config"]
         subgraph workflows["Reusable Workflows"]
@@ -14,7 +14,6 @@ flowchart TB
             PR[pr.yml]
             Release[release.yml]
             Docs[docs.yml]
-            Publish[publish.yml]
         end
         subgraph actions["Composite Actions"]
             subgraph ci-actions["CI"]
@@ -24,10 +23,6 @@ flowchart TB
             subgraph rel-actions["Release"]
                 RelNode[release/node]
                 RelPython[release/python]
-            end
-            subgraph pub-actions["Publish"]
-                PubNode[publish/node]
-                PubPython[publish/python]
             end
             subgraph doc-actions["Docs"]
                 DocsTypedoc[docs/typedoc]
@@ -61,13 +56,11 @@ flowchart TB
     Docs --> DocsTypedoc
     Docs --> DocsSphinx
     Docs --> DocsPublish
-    Publish --> PubNode
-    Publish --> PubPython
     actions ~~~ configs
 ```
 
 </div>
 
 <!--
-There are three distinct layers here. Workflows are the entry points that consuming repos call, actions are implementation details, and configs are npm packages. This separation of concerns makes maintenance tractable—you can change an action's internals without touching workflow signatures. Before we dive into each layer, let's discuss how to reference these, because branching strategy matters.
+There are three distinct layers here. Workflows are the entry points that consuming repos call, actions are implementation details, and configs are npm packages. This separation of concerns makes maintenance tractable. You can change an action's internals without touching workflow signatures. Before we dive into each layer, let's discuss how to reference these, because branching strategy matters.
 -->

@@ -11,14 +11,14 @@ inputs:
     description: Working directory
     required: false
     default: "."
+  docs-path:
+    description: Path to generated docs
+    required: false
+    default: "docs/_build/html"
   docs-directory:
     description: Directory containing Sphinx source
     required: false
     default: "docs"
-  docs-path:
-    description: Output path for generated docs
-    required: false
-    default: "docs/_build/html"
   dependency-groups:
     description: Dependency groups to install (uv --group)
     required: false

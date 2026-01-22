@@ -7,7 +7,7 @@ inputs:
     description: GitHub token for publishing to docs branch
     required: true
   docs-path:
-    description: Path to the documentation to publish
+    description: Path to generated docs
     required: false
     default: "docs"
   docs-branch:

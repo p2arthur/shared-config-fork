@@ -33,5 +33,5 @@ layout: two-cols-header
 </ul>
 
 <!--
-Each click reveals a problem/solution pair. The core value proposition is security updates in one place versus touching N repos. The "maintenance multiplied by N" pain is real—when teams patched log4j-style issues, centralized teams finished in minutes while decentralized teams took weeks. Now let's see the architecture that makes this possible.
+Each click reveals a problem/solution pair. The core value proposition is security updates in one place versus touching N repos. The "maintenance multiplied by N" pain is real. When teams patched log4j-style issues, centralized teams finished in minutes while decentralized teams took weeks. Now let's see the architecture that makes this possible.
 -->

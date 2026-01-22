@@ -32,5 +32,5 @@ jobs:
 - Everything else is identical
 
 <!--
-Node and Python share identical workflow structure—only project-type differs. This is the abstraction paying off. Your workflow files look the same whether you're in TypeScript or Python, so context switching between repos becomes trivial. Next, let's cover the docs workflow for generating and publishing documentation.
+Node and Python share identical workflow structure; only project-type differs. This is the abstraction paying off. Your workflow files look the same whether you're in TypeScript or Python, so context switching between repos becomes trivial. Next, let's look at orchestration strategies for managing when releases happen.
 -->

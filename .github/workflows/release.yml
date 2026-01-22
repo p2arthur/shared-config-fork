@@ -8,16 +8,16 @@ on:
         required: false
         type: boolean
         default: false
-      build-command:
-        description: Build command to run
-        required: false
-        type: string
-        default: ""
       config-path:
         description: Custom semantic-release config file path (uses built-in config if empty)
         required: false
         type: string
         default: ""
+      build-command:
+        description: Build command to run
+        required: false
+        type: string
+        default: "npm run build"
       dist-directory:
         description: Directory containing built package for atomic publish
         required: false
@@ -48,7 +48,7 @@ on:
         type: string
         default: "3.12"
       use-oidc:
-        description: Use OIDC trusted publishing, set to false to use tokens
+        description: Use OIDC trusted publishing, set to 'false' to use tokens
         required: false
         type: boolean
         default: true
@@ -73,16 +73,16 @@ on:
         required: false
         type: boolean
         default: false
-      build-command:
-        description: Build command to run
-        required: false
-        type: string
-        default: ""
       config-path:
         description: Custom semantic-release config file path (uses built-in config if empty)
         required: false
         type: string
         default: ""
+      build-command:
+        description: Build command to run
+        required: false
+        type: string
+        default: "npm run build"
       dist-directory:
         description: Directory containing built package for atomic publish
         required: false
@@ -113,7 +113,7 @@ on:
         type: string
         default: "3.12"
       use-oidc:
-        description: Use OIDC trusted publishing, set to false to use tokens
+        description: Use OIDC trusted publishing, set to 'false' to use tokens
         required: false
         type: boolean
         default: true
@@ -194,33 +194,8 @@ jobs:
           use-oidc: ${{ inputs.use-oidc }}
           working-directory: ${{ inputs.working-directory }}
 
-      - name: Update major version tag
-        if: (steps.release-node.outputs.new-release-published == 'true' || steps.release-python.outputs.new-release-published == 'true') && inputs.dry-run != true
-        env:
-          VERSION: ${{ steps.release-node.outputs.new-release-version || steps.release-python.outputs.new-release-version }}
-        run: |
-          MAJOR="v${VERSION%%.*}"
-          git config user.name "${{ steps.bot-token.outputs.app-slug }}[bot]"
-          git config user.email "${{ secrets.BOT_ID }}+${{ steps.bot-token.outputs.app-slug }}[bot]@users.noreply.github.com"
-          git tag -fa "$MAJOR" -m "Release $MAJOR (points to v$VERSION)"
-          git push origin "$MAJOR" --force
-          echo "Updated $MAJOR to point to v$VERSION"
-
-  back-merge:
-    name: Back-merge to main
-    needs: release
-    if: inputs.back-merge == true && inputs.dry-run != true && needs.release.result == 'success'
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - name: Generate Bot Token
-        id: bot-token
-        uses: p2arthur/shared-config-fork/actions/utils/bot-token@main
-        with:
-          app-id: ${{ secrets.BOT_ID }}
-          private-key: ${{ secrets.BOT_SK }}
-
-      - name: Checkout main
+      - name: Checkout main for back-merge
+        if: inputs.back-merge == true && inputs.dry-run != true && (steps.release-node.outputs.new-release-published == 'true' || steps.release-python.outputs.new-release-published == 'true')
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           ref: main
@@ -228,6 +203,7 @@ jobs:
           token: ${{ steps.bot-token.outputs.token }}
 
       - name: Merge release into main
+        if: inputs.back-merge == true && inputs.dry-run != true && (steps.release-node.outputs.new-release-published == 'true' || steps.release-python.outputs.new-release-published == 'true')
         run: |
           git config user.name "${{ steps.bot-token.outputs.app-slug }}[bot]"
           git config user.email "${{ secrets.BOT_ID }}+${{ steps.bot-token.outputs.app-slug }}[bot]@users.noreply.github.com"
