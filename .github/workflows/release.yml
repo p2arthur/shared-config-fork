@@ -79,10 +79,10 @@ on:
         type: string
         default: ""
       build-command:
-        description: Build command to run
+        description: Build command to run (defaults based on project-type if empty)
         required: false
         type: string
-        default: "npm run build"
+        default: ""
       dist-directory:
         description: Directory containing built package for atomic publish
         required: false
