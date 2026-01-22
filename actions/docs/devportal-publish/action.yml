@@ -2,25 +2,25 @@ name: Publish Docs to Algorand Developer Portal
 description: Publishes documentation to a dedicated docs branch for consumption by the Developer Portal
 
 inputs:
-  docs-path:
+  docs_path:
     description: "Location relative to the repo root of the docs folder"
     required: false
     default: "docs"
-  docs-branch:
+  docs_branch:
     description: "Name of the branch to publish the docs to"
     required: false
     default: "docs-dist"
-  github-token:
+  github_token:
     description: "GitHub token for publishing to docs branch"
     required: true
 
 outputs:
-  docs-target:
+  docs_target:
     description: "The version target that was published (e.g., 'latest' or 'v1.2.3')"
     value: ${{ steps.docs_target.outputs.target }}
-  update-latest:
+  update_latest:
     description: "Whether the latest folder was updated"
-    value: ${{ steps.docs-target.outputs.update-latest }}
+    value: ${{ steps.docs_target.outputs.update_latest }}
 
 runs:
   using: composite
@@ -32,7 +32,7 @@ runs:
 
     - name: Generate manifest.json
       shell: bash
-      run: node "${{ github.action_path }}/generate-manifest.mjs" "${{ inputs.docs-path }}" "${{ github.repository }}" "${{ github.sha }}"
+      run: node "${{ github.action_path }}/generate-manifest.mjs" "${{ inputs.docs_path }}" "${{ github.repository }}" "${{ github.sha }}"
     - name: Determine docs target
       id: docs_target
       shell: bash

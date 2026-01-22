@@ -3,22 +3,22 @@ name: Documentation
 on:
   workflow_call:
     inputs:
-      devportal-docs-branch:
+      devportal_docs_branch:
         description: Branch to publish docs for DevPortal consumption
         required: false
         type: string
         default: "docs-dist"
-      docs-path:
+      docs_path:
         description: Path to generated docs
         required: false
         type: string
         default: "docs"
-      node-version:
+      node_version:
         description: Node.js version
         required: false
         type: string
         default: "22"
-      project-type:
+      project_type:
         description: "Project type: node or python"
         required: true
         type: string
@@ -27,17 +27,17 @@ on:
         required: false
         type: boolean
         default: true
-      publish-devportal:
+      publish_devportal:
         description: Publish to DevPortal branch
         required: false
         type: boolean
         default: true
-      python-version:
+      python_version:
         description: Python version
         required: false
         type: string
         default: "3.12"
-      working-directory:
+      working_directory:
         description: Working directory
         required: false
         type: string
@@ -53,9 +53,9 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: Validate project-type
-        if: inputs.project-type != 'node' && inputs.project-type != 'python'
+        if: inputs.project_type != 'node' && inputs.project_type != 'python'
         run: |
-          echo "::error::project-type must be 'node' or 'python', got '${{ inputs.project-type }}'"
+          echo "::error::project-type must be 'node' or 'python', got '${{ inputs.project_type }}'"
           exit 1
 
   build:
@@ -69,42 +69,42 @@ jobs:
 
       - name: Generate TypeDoc
         id: typedoc
-        if: inputs.project-type == 'node'
+        if: inputs.project_type == 'node'
         uses: p2arthur/shared-config-fork/actions/docs/typedoc@main
         with:
-          docs-path: ${{ inputs.docs-path }}
-          node-version: ${{ inputs.node-version }}
-          working-directory: ${{ inputs.working-directory }}
+          docs_path: ${{ inputs.docs_path }}
+          node_version: ${{ inputs.node_version }}
+          working_directory: ${{ inputs.working_directory }}
 
       - name: Debug - List Generated Docs
-        if: inputs.project-type == 'node'
+        if: inputs.project_type == 'node'
         shell: bash
-        working-directory: ${{ inputs.working-directory }}
+        working-directory: ${{ inputs.working_directory }}
         run: |
           echo "=== Docs directory structure ==="
-          find ${{ inputs.docs-path }} -type f | head -50 || echo "No docs found"
+          find ${{ inputs.docs_path }} -type f | head -50 || echo "No docs found"
           echo ""
           echo "=== Looking for index.html ==="
-          find ${{ inputs.docs-path }} -name "index.html" || echo "No index.html found"
+          find ${{ inputs.docs_path }} -name "index.html" || echo "No index.html found"
           echo ""
-          echo "=== HTML docs path from action: ${{ steps.typedoc.outputs.html-docs-path }} ==="
+          echo "=== HTML docs path from action: ${{ steps.typedoc.outputs.html_docs_path }} ==="
 
       - name: Generate Sphinx Docs
-        if: inputs.project-type == 'python'
+        if: inputs.project_type == 'python'
         uses: p2arthur/shared-config-fork/actions/docs/sphinx@main
         with:
-          docs-path: ${{ inputs.docs-path }}
-          python-version: ${{ inputs.python-version }}
-          working-directory: ${{ inputs.working-directory }}
+          docs_path: ${{ inputs.docs_path }}
+          python_version: ${{ inputs.python_version }}
+          working_directory: ${{ inputs.working_directory }}
 
       - name: Determine Upload Path
         id: upload-path
         shell: bash
         run: |
-          if [ "${{ inputs.project-type }}" = "node" ] && [ -n "${{ steps.typedoc.outputs.html-docs-path }}" ]; then
-            echo "path=${{ inputs.working-directory }}/${{ steps.typedoc.outputs.html-docs-path }}" >> $GITHUB_OUTPUT
+          if [ "${{ inputs.project_type }}" = "node" ] && [ -n "${{ steps.typedoc.outputs.html_docs_path }}" ]; then
+            echo "path=${{ inputs.working_directory }}/${{ steps.typedoc.outputs.html_docs_path }}" >> $GITHUB_OUTPUT
           else
-            echo "path=${{ inputs.working-directory }}/${{ inputs.docs-path }}" >> $GITHUB_OUTPUT
+            echo "path=${{ inputs.working_directory }}/${{ inputs.docs_path }}" >> $GITHUB_OUTPUT
           fi
 
       - name: Upload Artifact
@@ -135,13 +135,13 @@ jobs:
       - name: Publish to GitHub Pages
         uses: p2arthur/shared-config-fork/actions/docs/publish@main
         with:
-          docs-path: docs
-          github-token: ${{ github.token }}
+          docs_path: docs
+          github_token: ${{ github.token }}
 
   devportal-publish:
     name: Publish to DevPortal Branch
     needs: build
-    if: inputs.publish-devportal && needs.build.result == 'success'
+    if: inputs.publish_devportal && needs.build.result == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -156,6 +156,6 @@ jobs:
       - name: Publish to DevPortal Branch
         uses: p2arthur/shared-config-fork/actions/docs/devportal-publish@main
         with:
-          docs-path: docs
-          docs-branch: ${{ inputs.devportal-docs-branch }}
-          github-token: ${{ github.token }}
+          docs_path: docs
+          docs_branch: ${{ inputs.devportal_docs_branch }}
+          github_token: ${{ github.token }}

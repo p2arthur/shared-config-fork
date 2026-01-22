@@ -63,13 +63,13 @@ jobs:
     if: ${{ !inputs.skip-docs && needs.ci.result == 'success' }}
     uses: p2arthur/shared-config-fork/.github/workflows/docs.yml@main
     with:
-      project-type: ${{ inputs.project-type }}
-      working-directory: ${{ inputs.working-directory }}
-      node-version: ${{ inputs.node-version }}
-      python-version: ${{ inputs.python-version }}
+      project_type: ${{ inputs.project-type }}
+      working_directory: ${{ inputs.working-directory }}
+      node_version: ${{ inputs.node-version }}
+      python_version: ${{ inputs.python-version }}
       # Always publish to both targets (GitHub Pages + DevPortal)
       publish: true
-      publish-devportal: true
+      publish_devportal: true
 
   release:
     name: Release (Beta)
