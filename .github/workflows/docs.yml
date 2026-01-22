@@ -135,8 +135,8 @@ jobs:
       - name: Publish to GitHub Pages
         uses: p2arthur/shared-config-fork/actions/docs/publish@main
         with:
-          docs-path: docs
-          github-token: ${{ github.token }}
+          docs_path: docs
+          github_token: ${{ github.token }}
 
   devportal-publish:
     name: Publish to DevPortal Branch
@@ -156,6 +156,6 @@ jobs:
       - name: Publish to DevPortal Branch
         uses: p2arthur/shared-config-fork/actions/docs/devportal-publish@main
         with:
-          docs-path: docs
-          docs-branch: ${{ inputs.devportal-docs-branch }}
-          github-token: ${{ github.token }}
+          docs_path: docs
+          docs_branch: ${{ inputs.devportal-docs-branch }}
+          github_token: ${{ github.token }}
