@@ -1,29 +1,30 @@
 name: On Merge to Main
-
+author: p2arthur
+description: CI, Docs, and Release workflow triggered on merges to main branch
 on:
   workflow_call:
     inputs:
       project-type:
-        description: "Project type: node or python"
+        description: Project type: node or python
         required: true
         type: string
       node-version:
-        description: "Node.js version (Node projects)"
+        description: Node.js version (Node projects)
         required: false
         type: string
-        default: "22"
+        default: 22
       python-version:
-        description: "Python version (Python projects)"
+        description: Python version (Python projects)
         required: false
         type: string
-        default: "3.12"
+        default: 3.12
       working-directory:
-        description: "Working directory (for monorepos)"
+        description: Working directory (for monorepos)
         required: false
         type: string
-        default: "."
+        default: .
       skip-docs:
-        description: "Skip documentation build and publish"
+        description: Skip documentation build and publish
         required: false
         type: boolean
         default: false

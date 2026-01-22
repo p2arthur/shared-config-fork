@@ -9,11 +9,11 @@ inputs:
   docs-path:
     description: Path to generated docs
     required: false
-    default: "docs"
+    default: docs
   docs-branch:
     description: Branch name to publish docs to
     required: false
-    default: "docs-dist"
+    default: docs-dist
 
 outputs:
   docs-target:
@@ -29,7 +29,7 @@ runs:
     - name: Setup Node.js
       uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
       with:
-        node-version: "20"
+        node-version: 20
 
     - name: Generate Manifest
       shell: bash
