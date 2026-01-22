@@ -81,6 +81,12 @@ runs:
       working-directory: ${{ github.action_path }}
       run: npm ci
 
+    - name: Build Package (if publishing)
+      if: inputs.pypi-publish == 'true'
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: ${{ inputs.build-command }}
+
     - name: Run semantic-release
       id: release
       shell: bash
