@@ -150,6 +150,12 @@ jobs:
       new-release-published: ${{ steps.release-node.outputs.new-release-published || steps.release-python.outputs.new-release-published }}
       new-release-version: ${{ steps.release-node.outputs.new-release-version || steps.release-python.outputs.new-release-version }}
     steps:
+      - name: Debug inputs
+        run: |
+          echo "project-type: ${{ inputs.project-type }}"
+          echo "build-command: '${{ inputs.build-command }}'"
+          echo "publish: ${{ inputs.publish }}"
+
       - name: Checkout
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
