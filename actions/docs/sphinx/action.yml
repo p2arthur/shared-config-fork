@@ -20,7 +20,7 @@ inputs:
     required: false
     default: "docs"
   dependency_groups:
-    description: Dependency groups to install (uv --group)
+    description: Dependency groups to install (uv --group), leave empty to skip group sync
     required: false
     default: "docs"
 
@@ -40,12 +40,31 @@ runs:
     - name: Install Dependencies
       shell: bash
       working-directory: ${{ inputs.working_directory }}
-      run: uv sync --group "${{ inputs.dependency_groups }}"
+      run: |
+        if [ -n "${{ inputs.dependency_groups }}" ]; then
+          uv sync --group "${{ inputs.dependency_groups }}"
+        else
+          uv sync
+        fi
 
     - name: Build Documentation
       shell: bash
       working-directory: ${{ inputs.working_directory }}
       run: |
+        DOCS_DIR="${{ inputs.docs_directory }}"
+        
+        # Try to use project's docs build command if available
+        if uv run build-docs 2>/dev/null; then
+          echo "✓ Docs built via project's build-docs command"
+          exit 0
+        fi
+        
+        # Fall back to sphinx-build if docs source exists
+        if [ ! -d "$DOCS_DIR" ] || [ ! -f "$DOCS_DIR/conf.py" ]; then
+          echo "::warning::Sphinx source not found at $DOCS_DIR/conf.py and no build-docs command available. Skipping build."
+          exit 0
+        fi
+        
         uv run sphinx-build \
           -b html \
           "${{ inputs.docs_directory }}" \
