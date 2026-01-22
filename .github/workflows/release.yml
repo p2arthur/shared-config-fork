@@ -14,10 +14,10 @@ on:
         type: string
         default: ""
       build-command:
-        description: Build command to run
+        description: Build command to run (defaults based on project-type if empty)
         required: false
         type: string
-        default: "npm run build"
+        default: ""
       dist-directory:
         description: Directory containing built package for atomic publish
         required: false
@@ -168,7 +168,7 @@ jobs:
         uses: p2arthur/shared-config-fork/actions/release/node@main
         with:
           bot-token: ${{ steps.bot-token.outputs.token }}
-          build-command: ${{ inputs.build-command }}
+          build-command: ${{ inputs.build-command || 'npm run build' }}
           config-path: ${{ inputs.config-path }}
           dist-directory: ${{ inputs.dist-directory }}
           dry-run: ${{ inputs.dry-run }}
@@ -184,7 +184,7 @@ jobs:
         uses: p2arthur/shared-config-fork/actions/release/python@main
         with:
           bot-token: ${{ steps.bot-token.outputs.token }}
-          build-command: ${{ inputs.build-command }}
+          build-command: ${{ inputs.build-command || 'uv build' }}
           config-path: ${{ inputs.config-path }}
           dist-directory: ${{ inputs.dist-directory }}
           dry-run: ${{ inputs.dry-run }}
