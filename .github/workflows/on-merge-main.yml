@@ -5,7 +5,7 @@ on:
   workflow_call:
     inputs:
       project-type:
-        description: "Project type: node or python"
+        description: node or python
         required: true
         type: string
       node-version:
