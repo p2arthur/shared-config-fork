@@ -1,50 +1,50 @@
-name: Publish Docs to DevPortal Branch
-author: mrcointreau
-description: Publish documentation to a dedicated branch for DevPortal consumption
+name: Publish Docs to Algorand Developer Portal
+description: Publishes documentation to a dedicated docs branch for consumption by the Developer Portal
 
 inputs:
-  github-token:
-    description: GitHub token for publishing to docs branch
+  docs_path:
+    description: "Location relative to the repo root of the docs folder"
+    required: false
+    default: "docs"
+  docs_branch:
+    description: "Name of the branch to publish the docs to"
+    required: false
+    default: "docs-dist"
+  github_token:
+    description: "GitHub token for publishing to docs branch"
     required: true
-  docs-path:
-    description: Path to generated docs
-    required: false
-    default: docs
-  docs-branch:
-    description: Branch name to publish docs to
-    required: false
-    default: docs-dist
 
 outputs:
-  docs-target:
-    description: The version target that was published (e.g., 'latest' or 'v1.2.3')
-    value: ${{ steps.docs-target.outputs.target }}
-  update-latest:
-    description: Whether the latest folder was updated
-    value: ${{ steps.docs-target.outputs.update-latest }}
+  docs_target:
+    description: "The version target that was published (e.g., 'latest' or 'v1.2.3')"
+    value: ${{ steps.docs_target.outputs.target }}
+  update_latest:
+    description: "Whether the latest folder was updated"
+    value: ${{ steps.docs_target.outputs.update_latest }}
 
 runs:
   using: composite
   steps:
     - name: Setup Node.js
-      uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
+      uses: actions/setup-node@v4
       with:
         node-version: 20
 
-    - name: Generate Manifest
+    - name: Generate manifest.json
       shell: bash
-      run: node "${{ github.action_path }}/generate-manifest.mjs" "${{ inputs.docs-path }}" "${{ github.repository }}" "${{ github.sha }}"
+      run: node "${{ github.action_path }}/generate-manifest.mjs" "${{ inputs.docs_path }}" "${{ github.repository }}" "${{ github.sha }}"
 
-    - name: Determine Docs Target
-      id: docs-target
+    - name: Determine docs target
+      id: docs_target
       shell: bash
       run: |
         if [[ "${{ github.event_name }}" == "release" ]]; then
           tag="${{ github.event.release.tag_name }}"
           if [[ -z "$tag" ]]; then
-            echo "::error::Release event missing tag_name"
+            echo "Release event missing tag_name" >&2
             exit 1
           fi
+          # Strip leading 'v' if present to get clean version
           version="${tag#v}"
           target="v${version}"
           update_latest="true"
@@ -53,22 +53,23 @@ runs:
           update_latest="false"
         fi
         echo "target=$target" >> "$GITHUB_OUTPUT"
-        echo "update-latest=$update_latest" >> "$GITHUB_OUTPUT"
-        echo "Publishing to: $target (update-latest: $update_latest)"
+        echo "update_latest=$update_latest" >> "$GITHUB_OUTPUT"
+        echo "Publishing to: $target (update_latest: $update_latest)"
 
-    - name: Checkout Docs Branch
-      uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+    - name: Checkout docs branch
+      uses: actions/checkout@v4
       with:
-        ref: ${{ inputs.docs-branch }}
+        ref: ${{ inputs.docs_branch }}
         path: docs-branch
       continue-on-error: true
 
-    - name: Prepare Publish Workspace
+    - name: Prepare publish workspace
       shell: bash
       run: |
-        docs_path="${{ inputs.docs-path }}"
-        target="${{ steps.docs-target.outputs.target }}"
+        docs_path="${{ inputs.docs_path }}"
+        target="${{ steps.docs_target.outputs.target }}"
 
+        # Start with existing docs branch content (if it exists)
         if [[ -d "docs-branch" ]]; then
           rm -rf docs-branch/.git
           mv docs-branch publish-staging
@@ -76,35 +77,41 @@ runs:
           mkdir -p publish-staging
         fi
 
+        # Overwrite target version folder
         rm -rf "publish-staging/${target}"
         mkdir -p "publish-staging/${target}"
         cp -R "${docs_path}/." "publish-staging/${target}/"
 
-        if [[ "${{ steps.docs-target.outputs.update-latest }}" == "true" ]]; then
+        # Overwrite latest folder on release
+        if [[ "${{ steps.docs_target.outputs.update_latest }}" == "true" ]]; then
           rm -rf "publish-staging/latest"
           mkdir -p "publish-staging/latest"
           cp -R "${docs_path}/." "publish-staging/latest/"
         fi
 
-    - name: Publish Docs Branch
-      uses: peaceiris/actions-gh-pages@4f9cc6603a9aeac94c04a96ae854ab100750d7f4 # v4.0.0
+    - name: Publish docs branch
+      uses: peaceiris/actions-gh-pages@v4
       with:
-        github_token: ${{ inputs.github-token }}
+        github_token: ${{ inputs.github_token }}
         publish_dir: publish-staging
-        publish_branch: ${{ inputs.docs-branch }}
+        publish_branch: ${{ inputs.docs_branch }}
         keep_files: false
 
     - name: Summary
       if: always()
       shell: bash
       run: |
-        echo "## DevPortal Documentation Publish Summary" >> $GITHUB_STEP_SUMMARY
+        echo "## Documentation Publish Summary" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "- **Repository**: \`${{ github.repository }}\`" >> $GITHUB_STEP_SUMMARY
-        echo "- **Version Target**: \`${{ steps.docs-target.outputs.target || 'latest' }}\`" >> $GITHUB_STEP_SUMMARY
-        echo "- **Documentation Branch**: \`${{ inputs.docs-branch }}\`" >> $GITHUB_STEP_SUMMARY
+        echo "- **Version target**: \`${{ steps.docs_target.outputs.target || 'latest' }}\`" >> $GITHUB_STEP_SUMMARY
+        echo "- **Documentation Branch**: \`${{ inputs.docs_branch }}\`" >> $GITHUB_STEP_SUMMARY
         if [ "${{ job.status }}" == "success" ]; then
-          echo "- **Status**: Success" >> $GITHUB_STEP_SUMMARY
+          echo "- **Build Status**: ✅ Success" >> $GITHUB_STEP_SUMMARY
         else
-          echo "- **Status**: Failed" >> $GITHUB_STEP_SUMMARY
+          echo "- **Build Status**: ❌ Failed" >> $GITHUB_STEP_SUMMARY
         fi
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "📝 Documentation published successfully. The DevPortal will sync these changes during its next nightly update." >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "💡 **Need immediate update?** Navigate to the DevPortal repository Actions tab and manually trigger the documentation import workflow." >> $GITHUB_STEP_SUMMARY
