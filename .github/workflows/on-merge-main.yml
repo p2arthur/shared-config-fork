@@ -83,6 +83,7 @@ jobs:
       working-directory: ${{ inputs.working-directory }}
       node-version: ${{ inputs.node-version }}
       python-version: ${{ inputs.python-version }}
+      build-command: ${{ inputs.project-type == 'node' && 'npm run build' || 'uv build' }}
       publish: true
       # No back-merge on main (beta releases stay on main)
     secrets:

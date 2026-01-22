@@ -53,33 +53,33 @@ runs:
       run: |
         DOCS_DIR="${{ inputs.docs_directory }}"
         DOCS_PATH="${{ inputs.docs_path }}"
-        
+
         # Try to use project's docs build command if available
         echo "Attempting to build docs via 'uv run build-docs'..."
         if uv run build-docs; then
           echo "✓ Docs built via project's build-docs command"
           exit 0
         fi
-        
+
         echo "build-docs command not found, checking for Sphinx setup..."
-        
+
         # Fall back to sphinx-build only if docs source exists with conf.py
         if [ ! -d "$DOCS_DIR" ]; then
           echo "::warning::Docs directory not found at $DOCS_DIR. Skipping build."
           exit 0
         fi
-        
+
         if [ ! -f "$DOCS_DIR/conf.py" ]; then
           echo "::warning::Sphinx conf.py not found at $DOCS_DIR/conf.py. Skipping build."
           exit 0
         fi
-        
+
         # Ensure source and destination are different
         if [ "$(cd "$DOCS_DIR" 2>/dev/null && pwd)" = "$(cd "$DOCS_PATH" 2>/dev/null && pwd)" ]; then
           echo "::warning::Source and destination directories are the same. Skipping build."
           exit 0
         fi
-        
+
         echo "Building with sphinx-build..."
         uv run sphinx-build \
           -b html \
