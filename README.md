@@ -1,3 +1,25 @@
+# Shared CI and Documentation Actions
+
+Fork of mrcointreau’s shared GitHub Actions for builds, documentation, and release automation.
+
+Reusable workflow and composite-action definitions provide the integration surface. Keep upstream attribution when adapting them into other repositories.
+
+## Provenance
+
+This repository is a fork of [mrcointreau/shared-config](https://github.com/mrcointreau/shared-config). Upstream authorship and license terms apply to the retained source. The fork may differ from the upstream default branch; inspect its commit history when reviewing a specific implementation.
+
+## Explore the repository
+
+- [`scripts/`](scripts/)
+- [`.github/`](.github/)
+
+## Project documentation
+
+The existing guide below preserves the project-specific setup, examples, and credits. Its commands describe the checked-in project; no deployment or transaction is performed by reading this repository.
+
+<details>
+<summary>Read the project guide</summary>
+
 # @mrcointreau/shared-config
 
 Reusable GitHub Actions workflows and shared configurations for Node.js and Python projects.
@@ -202,3 +224,9 @@ Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for gui
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+</details>
+
+## License
+
+See [LICENSE](LICENSE) for license terms and attribution.
